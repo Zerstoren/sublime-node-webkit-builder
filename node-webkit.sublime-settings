@@ -1,0 +1,11 @@
+{
+    // Set path to save a compine project file.
+    // if use dot, .nw weel be save on root filder of project
+    "save_to": ".",
+    "nw_command": "/usr/bin/nw",
+    "autostart": true,
+    "ignore" :
+    [
+        "/.git/"
+    ]
+}

@@ -1,0 +1,3 @@
+[
+    { "keys": ["f8"], "command": "nodewebkit" }
+]
