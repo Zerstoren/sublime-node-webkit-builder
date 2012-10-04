@@ -26,9 +26,9 @@ SOFTWARE.
 import sublime
 import sublime_plugin
 import zipfile
-import os
 import subprocess
 import json
+import os
 
 
 class Nodewebkit(sublime_plugin.TextCommand):
@@ -38,24 +38,71 @@ class Nodewebkit(sublime_plugin.TextCommand):
         """
         Compine project and execute this project for node-webkit
         """
-        # Find folder where current file and file name
+        # Find folder where current file
         folder, fileName = self.view.file_name().rsplit('/', 1)
 
-        # If this is not a package.json, nothing to do here
-        if fileName.replace('\n', '') != 'package.json':
-            return False
+        # Load plugin settings
+        self.settings = sublime.load_settings('node-webkit.sublime-settings')
 
-        # Load plugin settings and project name
-        settings = sublime.load_settings('node-webkit.sublime-settings')
-        project = self.getProjectConfig()
+        # Find project root folder
+        # max deep is 100 folder
+        for i in xrange(0, 100):
+            print folder.encode('utf-8')
+            try:
+                fileDescriptor = open(folder + '/package.json', 'r')
+            except:
+                folderInfo = folder.rsplit('/', 1)
+                if len(folderInfo) <= 1:
+                    # We not find the need package file
+                    sublime.status_message('Cannot start project, I dont find package.json')
+                    return False
+                elif folderInfo[0] == '/':
+                    # If we comming to root folder, stop all
+                    sublime.status_message('Cannot start project, I dont find package.json')
+                    return False
+                else:
+                    folder = folderInfo[0]
+            else:
+                # Some sugar for try
+                # If file open ok, lets move to next place
+                break
 
-        pathToSave = settings.get('save_to')
+        # Arguments for open NW project
+        args = []
+        # NW executable file
+        args.append(self.settings.get('nw_command'))
+        # NW flags open
+        if self.settings.get('nw_flags'):
+            args.append(self.settings.get('nw_flags'))
+        # Project folder
+        args.append(folder)
+
+        subprocess.Popen(args)
+
+        if self.settings.get('autopack'):
+            self.compineProject(folder, fileDescriptor)
+        else:
+            fileDescriptor.close()
+
+    def getProjectConfig(self, fileDescriptor):
+        """
+        Get the project name from package.json.
+        """
+        jsonData = "".join(fileDescriptor.readlines())
+        fileDescriptor.close()
+
+        return json.loads(jsonData)['name']
+
+    def compineProject(self, folder, fileDescriptor):
+
+        pathToSave = self.settings.get('save_to')
 
         if pathToSave != '.':
             folder = pathToSave
 
         # This is path and file name archive, but him don`t have standart name .zip
         # ZipFile can write zip archive without .zip extension
+        project = self.getProjectConfig(fileDescriptor)
         archive = folder + '/' + project + '.nw'
 
         try:
@@ -65,7 +112,7 @@ class Nodewebkit(sublime_plugin.TextCommand):
             return False
 
         # Load from config data
-        ignore = settings.get('ignore')
+        ignore = self.settings.get('ignore')
         for root, dirs, files in os.walk(folder):
             for item in files:
                 path = root + '/' + item
@@ -83,22 +130,5 @@ class Nodewebkit(sublime_plugin.TextCommand):
 
                 # Write file to archive
                 zf.write(path, path.replace(folder, ''))
-        #except:
-        #    sublime.error_message('Cannot add files to archive')
-        #    return False
 
         zf.close()
-
-        # if auto start is true, start the project
-        if settings.get('autostart'):
-            subprocess.Popen([settings.get('nw_command'), archive])
-
-    def getProjectConfig(self):
-        """
-        Get the project name from package.json.
-        """
-        op = file(self.view.file_name().replace('\n', ''))
-        jsonData = "".join(op.readlines())
-        op.close()
-
-        return json.loads(jsonData)['name']

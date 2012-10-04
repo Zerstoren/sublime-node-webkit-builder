@@ -2,8 +2,20 @@
     // Set path to save a compine project file.
     // if use dot, .nw weel be save on root filder of project
     "save_to": ".",
-    "nw_command": "/usr/bin/nw",
-    "autostart": true,
+
+    // This is path to node-webkit exec file
+    "nw_command": "/usr/local/nw/nw",
+
+    // Open flags
+    "nw_flags": "--developer",
+
+    // We need autopack. If is develop, you don`t need this option
+    // If this option false, the window will open faster. Because plugin dont create archive
+    "autopack": true,
+
+    // Ignore some folder, files.
+    // If this string find in full url, they be exclude from archive
+    // It`s not RegExp. Maybe need RegExp?
     "ignore" :
     [
         "/.git/"
