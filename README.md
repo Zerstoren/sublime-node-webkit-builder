@@ -1,27 +1,35 @@
 sublime-node-webkit
 ===============
 
-sublime text 2 plugin for node-webkit. Create nw archive and execute this project.
+Sublime Text 2 plugin for node-webkit.
+Creates .nw archive and executes it on the fly.
 
 
-Install
+Installation
 ===============
+
+Make sure you have [node-webkit](https://github.com/rogerwang/node-webkit) installed.
+
+Checkout this git repository into your Sublime Text 2 packages dir ( refer to Subltime Text 2 > Preferences > Browse Packages ):
 
 ```
 cd to/your/sublime/config
 git clone git@github.com:Zerstoren/sublime-node-webkit-builder.git Nodewebkit
-# It`s all, lets begin to use
 ```
 
+Edit plugin settings to reflect proper location of node-webkit on your system.
 
-Use
+
+
+Using
 ===============
 
-Open your project file and press F8.
-You open some file (base.js as example) and press F8, plugin go to parents directory for find package.json. After find plugin open this folder on node-webkit.
+Assuming you already have a proper node-webkit project with a package.json, just open your
+project in Sublime Text 2 and press F8 ( on OS X default hotkey is Ctrl+Alt+N ). Sublime-node-webkit will
+run and pack your node-webkit project if needed.
 
 
 Issues
 ==============
 
-Plugin not testing in Windows and OSX (who can help with OSX? I don`t have this OS).
+Not tested in Windows. May destroy all you files and kill your cat.

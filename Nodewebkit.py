@@ -36,7 +36,7 @@ class Nodewebkit(sublime_plugin.TextCommand):
 
     def run(self, edit):
         """
-        Compine project and execute this project for node-webkit
+        compile project and run with node-webkit
         """
         # Find folder where current file
         folder, fileName = self.view.file_name().rsplit('/', 1)
@@ -46,72 +46,75 @@ class Nodewebkit(sublime_plugin.TextCommand):
 
         # Find project root folder
         # max deep is 100 folder
-        for i in xrange(0, 100):
+        for i in xrange(0, 10):
             print folder.encode('utf-8')
             try:
                 fileDescriptor = open(folder + '/package.json', 'r')
             except:
                 folderInfo = folder.rsplit('/', 1)
                 if len(folderInfo) <= 1:
-                    # We not find the need package file
-                    sublime.status_message('Cannot start project, I dont find package.json')
+                    # Couldn't find the need package file
+                    sublime.status_message('Can\'t start project. No package.json detected')
                     return False
                 elif folderInfo[0] == '/':
                     # If we comming to root folder, stop all
-                    sublime.status_message('Cannot start project, I dont find package.json')
+                    sublime.status_message('Can\'t start project. No package.json detected')
                     return False
                 else:
                     folder = folderInfo[0]
             else:
                 # Some sugar for try
-                # If file open ok, lets move to next place
+                # If file opens ok, lets move to next place
                 break
 
         # Arguments for open NW project
         args = []
+
         # NW executable file
         args.append(self.settings.get('nw_command'))
-        # NW flags open
-        if self.settings.get('nw_flags'):
-            args.append(self.settings.get('nw_flags'))
+
+        # NW flags
+        flags = self.settings.get('nw_flags')
+        if flags:
+            args = args + flags
+
         # Project folder
         args.append(folder)
 
         subprocess.Popen(args)
 
         if self.settings.get('autopack'):
-            self.compineProject(folder, fileDescriptor)
+            self.compileProject(folder, fileDescriptor)
         else:
             fileDescriptor.close()
 
-    def getProjectConfig(self, fileDescriptor):
+    def getProjectName(self, fileDescriptor):
         """
-        Get the project name from package.json.
+        Get project name from package.json.
         """
         jsonData = "".join(fileDescriptor.readlines())
         fileDescriptor.close()
 
         return json.loads(jsonData)['name']
 
-    def compineProject(self, folder, fileDescriptor):
+    def compileProject(self, folder, fileDescriptor):
 
         pathToSave = self.settings.get('save_to')
 
         if pathToSave != '.':
             folder = pathToSave
 
-        # This is path and file name archive, but him don`t have standart name .zip
-        # ZipFile can write zip archive without .zip extension
-        project = self.getProjectConfig(fileDescriptor)
+        project = self.getProjectName(fileDescriptor)
+        # will be using .nw extension instead of .zip
         archive = folder + '/' + project + '.nw'
 
         try:
             zf = zipfile.ZipFile(archive, mode='w')
         except:
-            sublime.error_message('Error to create .nw file in Node Webkit')
+            sublime.error_message('Unable to create ' + archive)
             return False
 
-        # Load from config data
+        # Skip ignored files/dirs and put everything else info archive
         ignore = self.settings.get('ignore')
         for root, dirs, files in os.walk(folder):
             for item in files:
