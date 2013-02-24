@@ -1,21 +1,24 @@
 {
-    // Set path to save a compine project file.
-    // if use dot, .nw weel be save on root filder of project
+    // Path for compiled project file.
     "save_to": ".",
 
-    // This is path to node-webkit exec file
-    "nw_command": "/usr/local/nw/nw",
+    // Autopack ( if true) will create .nw archive upon every run. This will slow down window opening
+    "autopack": false,
 
-    // Open flags
-    "nw_flags": "--developer",
 
-    // We need autopack. If is develop, you don`t need this option
-    // If this option false, the window will open faster. Because plugin dont create archive
-    "autopack": true,
+    /*  Linux                                                                       */
+    // "nw_command": "/usr/bin/node-webkit",
+    // "nw_flags": [ "--developer" ],
 
-    // Ignore some folder, files.
-    // If this string find in full url, they be exclude from archive
-    // It`s not RegExp. Maybe need RegExp?
+    /*  OS X                                                                        */
+    "nw_command": "open",
+    "nw_flags": [ "-a", "/Applications/node-webkit.app", "--args", "--developer" ],
+
+    /*  Windows (NOT TESTED)                                                        */
+    // "nw_command": "node-webkit.exe",
+    // "nw_flags": [ "-a", "/Applications/node-webkit.app", "--args", "--developer" ],
+
+    // Files/dirs to ignore (not a regexp)
     "ignore" :
     [
         "/.git/"
