@@ -14,9 +14,9 @@
     "nw_command": "open",
     "nw_flags": [ "-a", "/Applications/node-webkit.app", "--args", "--developer" ],
 
-    /*  Windows (NOT TESTED)                                                        */
-    // "nw_command": "node-webkit.exe",
-    // "nw_flags": [ "-a", "/Applications/node-webkit.app", "--args", "--developer" ],
+    /*  Windows (make sure node-webkit directory is in windows system path) */
+    // "nw_command": "nw.exe",
+    // "nw_flags": [ "--developer" ],
 
     // Files/dirs to ignore (not a regexp)
     "ignore" :

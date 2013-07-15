@@ -39,8 +39,8 @@ class Nodewebkit(sublime_plugin.TextCommand):
         compile project and run with node-webkit
         """
         # Find folder where current file
-        folder, fileName = self.view.file_name().rsplit('/', 1)
-
+        folder, fileName = self.view.file_name().rsplit(os.sep, 1)
+ 
         # Load plugin settings
         self.settings = sublime.load_settings('node-webkit.sublime-settings')
 
@@ -49,14 +49,14 @@ class Nodewebkit(sublime_plugin.TextCommand):
         for i in xrange(0, 10):
             print folder.encode('utf-8')
             try:
-                fileDescriptor = open(folder + '/package.json', 'r')
+                fileDescriptor = open(folder + os.sep + 'package.json', 'r')
             except:
-                folderInfo = folder.rsplit('/', 1)
+                folderInfo = folder.rsplit(os.sep, 1)
                 if len(folderInfo) <= 1:
                     # Couldn't find the need package file
                     sublime.status_message('Can\'t start project. No package.json detected')
                     return False
-                elif folderInfo[0] == '/':
+                elif folderInfo[0] == os.sep:
                     # If we comming to root folder, stop all
                     sublime.status_message('Can\'t start project. No package.json detected')
                     return False
@@ -101,12 +101,19 @@ class Nodewebkit(sublime_plugin.TextCommand):
 
         pathToSave = self.settings.get('save_to')
 
-        if pathToSave != '.':
+        if not pathToSave.startswith('.'):
             folder = pathToSave
+        else:
+            folder = folder + os.sep + pathToSave
+
+        # check and create if destination directory doesn't exists
+        sublime.status_message('Using directory ' + os.path.realpath(folder) + ' for autopack')
+        if not os.path.exists(os.path.realpath(folder)):
+            os.makedirs(os.path.realpath(folder))
 
         project = self.getProjectName(fileDescriptor)
         # will be using .nw extension instead of .zip
-        archive = folder + '/' + project + '.nw'
+        archive = folder + os.sep + project + '.nw'
 
         try:
             zf = zipfile.ZipFile(archive, mode='w')
@@ -114,11 +121,11 @@ class Nodewebkit(sublime_plugin.TextCommand):
             sublime.error_message('Unable to create ' + archive)
             return False
 
-        # Skip ignored files/dirs and put everything else info archive
+        # Skip ignored files/dirs and put everything else into archive
         ignore = self.settings.get('ignore')
         for root, dirs, files in os.walk(folder):
             for item in files:
-                path = root + '/' + item
+                path = root + os.sep + item
                 if item == project + '.nw':
                     continue
 
